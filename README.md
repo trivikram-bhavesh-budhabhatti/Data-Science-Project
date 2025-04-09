@@ -94,7 +94,4 @@ The script processes both datasets sequentially and prints results to the consol
 Notes
 Datasets must be in CSV format with expected column names (e.g., "Glucose" for Diabetes, "successful_marketing" for Marketing).
 The code is modular and reusable for other datasets with minor adjustments.
-License
-This project is licensed under the MIT License - see the  file for details.
 
-This README provides a clear, structured explanation of your project, including setup instructions and usage details, while embedding the one-pager summary you requested. Feel free to adjust the repository URL, add a requirements.txt file, or tweak the license section as needed! Let me know if you need further refinements.

@@ -66,6 +66,108 @@ class DataPreprocessor:
         df = self.scale_data(df, cols)
         return df
 
+class DataVisualization:
+    def __init__(self):
+        pass
+    def visualize_medical_data(self,df):
+        # print("Dataset shape:", df.shape)
+        # print(df.describe())
+
+        # plt.figure(figsize=(16, 10))
+        # sns.heatmap(df.corr(), annot=True, cmap="coolwarm", fmt=".2f")
+        # plt.title("Correlation Matrix - Medical Data")
+        # plt.show()
+
+        # # Pairplot
+        # sns.pairplot(df, diag_kind='kde')
+        # plt.suptitle("Pairplot - Medical Features", y=1.02)
+        # plt.show()
+
+        # # Distribution plots
+        # df.hist(bins=20, figsize=(16, 10), color='skyblue')
+        # plt.suptitle("Feature Distributions - Medical Data")
+        # plt.show()
+        plt.figure(figsize=(15, 10))
+        for i, col in enumerate(df.columns, 1):
+            plt.subplot(3, 3, i)
+            sns.histplot(df[col], kde=True)
+            plt.title(f'Distribution of {col}')
+        plt.tight_layout()
+        plt.suptitle("Diabetes Dataset Feature Distributions", y=1.02)
+        plt.savefig("databeforeprocessing.png")
+
+        # Correlation matrix
+        plt.figure(figsize=(10, 8))
+        sns.heatmap(df.corr(), annot=True, cmap='coolwarm', center=0)
+        plt.title("Correlation Matrix of Diabetes Dataset")
+        plt.savefig('diabetescorrelation.png')
+    def visualize_medical_data_post_preprocessing(self,df):
+        plt.figure(figsize=(15, 10))
+        for i, col in enumerate(df.columns, 1):
+            plt.subplot(3, 3, i)
+            sns.histplot(df[col], kde=True)
+            plt.title(f'Normalized {col}')
+        plt.tight_layout()
+        plt.suptitle("Diabetes Dataset After Preprocessing", y=1.02)
+        plt.savefig('postprocessing.png')
+
+    def visualize_marketing_data(df):
+        print("Dataset shape:", df.shape)
+        print(df.describe(include='all'))
+
+        # Target distribution
+        sns.countplot(x='successful_marketing', data=df, palette='Set2')
+        plt.title("Target Variable Distribution - Marketing")
+        plt.show()
+
+        # Job vs success
+        plt.figure(figsize=(12, 6))
+        sns.countplot(x='job', hue='successful_marketing', data=df, palette='coolwarm')
+        plt.xticks(rotation=45)
+        plt.title("Job vs Successful Marketing")
+        plt.show()
+
+        # Correlation heatmap for numeric columns
+        num_df = df.select_dtypes(include=np.number)
+        plt.figure(figsize=(10, 6))
+        sns.heatmap(num_df.corr(), annot=True, cmap="viridis", fmt=".2f")
+        plt.title("Numeric Feature Correlations - Marketing")
+        plt.show()
+    
+    def visualize_clusters(self, df, features, label_col='Outcome'):
+        # Safety check: make sure features are strings (column names)
+        if not all(isinstance(f, str) for f in features):
+            raise ValueError("All elements in 'features' must be column name strings.")
+
+        # 2D Scatterplot
+        plt.figure(figsize=(10, 6))
+        sns.scatterplot(data=df, x=features[0], y=features[1], hue=label_col, palette='Set1')
+        plt.title(f"2D Clustering: {features[0]} vs {features[1]}")
+        plt.grid(True)
+        plt.show()
+
+        # Optional 3D Scatterplot
+        # if len(features) >= 3:
+        #     from mpl_toolkits.mplot3d import Axes3D
+        #     fig = plt.figure(figsize=(10, 7))
+        #     ax = fig.add_subplot(111, projection='3d')
+        #     scatter = ax.scatter(df[features[0]], df[features[1]], df[features[2]], 
+        #                          c=df[label_col], cmap='coolwarm', s=50)
+        #     ax.set_xlabel(features[0])
+        #     ax.set_ylabel(features[1])
+        #     ax.set_zlabel(features[2])
+        #     plt.title(f"3D Clustering: {features[0]}, {features[1]}, {features[2]}")
+        #     plt.show()
+
+    def visualize_pca(X_pca, y, title="PCA Visualization"):
+        plt.figure(figsize=(10, 6))
+        sns.scatterplot(x=X_pca[:, 0], y=X_pca[:, 1], hue=y, palette='Set1')
+        plt.title(title)
+        plt.xlabel("PCA Component 1")
+        plt.ylabel("PCA Component 2")
+        plt.grid(True)
+        plt.show()
+
 
 # Label Maker Class
 class LabelMaker:
@@ -166,14 +268,17 @@ class Encoder:
 def main():
     # Medical Data
     df = pd.read_csv("./data_file/diabetes_project.csv")
+    DataVisualization().visualize_medical_data(df)
     prep = DataPreprocessor()
     df_clean = prep.preprocess(df, "Medical Data")
     print("Cleaned Medical Data:\n", df_clean.head())
+    DataVisualization().visualize_medical_data_post_preprocessing(df_clean)
 
     # Labels
     label_maker = LabelMaker()
     feats = ['Glucose', 'BMI', 'Age']
     df_with_labels = label_maker.make_labels(df_clean, feats)
+    DataVisualization().visualize_clusters(df_with_labels, ['Glucose', 'BMI', 'Age'])
     print("Data with labels:\n", df_with_labels.head())
 
     # Features
@@ -200,7 +305,6 @@ def main():
 
     df2_clean = prep.preprocess(df2_enc.drop('successful_marketing', axis=1), "Marketing Data")
     df2_clean['successful_marketing'] = df2['successful_marketing']
-
     X_train2, X_test2, y_train2, y_test2 = feat_ext.split(df2_clean, 'successful_marketing')
     X_train2_pca, X_test2_pca = feat_ext.pca_analysis(X_train2, X_test2)
 

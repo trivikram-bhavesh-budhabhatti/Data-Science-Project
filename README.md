@@ -9,29 +9,26 @@ This repository contains a Python script implementing a comprehensive machine le
 
 **`🔧 Pipeline Components`**
 
-**`1. DataPreprocessor Class`**
+### 1. `DataPreprocessor` Class
 - **Purpose**: Cleans and prepares data for modeling.
 - **Functions**:
   - `show_outliers`: Visualizes outliers using boxplots (before/after cleaning).
   - `clean_outliers`: Removes outliers using z-score (threshold = 3).
   - `fill_missing`: Imputes missing values using column means.
   - `scale_data`: Standardizes features using `StandardScaler`.
-  - `preprocess`: Executes all steps, tailored to either “Medical Data” or “Marketing Data”.
-- **Key Features**: Handles missing values, scales data, removes outliers with optional visualizations.
+  - `preprocess`: Executes all steps for either “Medical Data” or “Marketing Data”.
 
-**`2. LabelMaker Class`**
+### 2. `LabelMaker` Class
 - **Purpose**: Generates binary labels for the unsupervised Diabetes dataset.
-- **Method**: 
-  - Applies `KMeans` (2 clusters) on features like Glucose, BMI, and Age.
-  - Assigns “Outcome” based on higher glucose mean in clusters.
+- **Method**: Applies KMeans clustering on features like Glucose, BMI, and Age. Assigns labels based on glucose mean of clusters.
 
-**`3. FeatureExtractor Class`**
-- **Purpose**: Prepares data using PCA and train-test splits.
+### 3. `FeatureExtractor` Class
+- **Purpose**: Prepares data using PCA and performs train-test splits.
 - **Functions**:
   - `split`: Splits dataset (80% train, 20% test).
   - `pca_analysis`: Applies PCA to reduce dimensions to 3 components.
 
-**`4. SuperLearner Class`**
+### 4. `SuperLearner` Class
 - **Purpose**: Ensemble model using stacking for classification.
 - **Models**:
   - **Base models**: `GaussianNB`, `MLPClassifier`, `KNeighborsClassifier`
@@ -39,36 +36,68 @@ This repository contains a Python script implementing a comprehensive machine le
 - **Functions**:
   - `tune_models`: Hyperparameter tuning with `GridSearchCV`.
   - `get_preds`: Generates meta-features via cross-validation.
-  - `train_final`: Trains the final model on stacked outputs.
-  - `predict`, `check_accuracy`: Makes predictions and evaluates performance.
+  - `train_final`: Trains final model on stacked outputs.
+  - `predict`, `check_accuracy`: Predicts and evaluates performance.
 
-**`5. Encoder Class`**
+### 5. `Encoder` Class
 - **Purpose**: Encodes categorical features in the Marketing dataset using `LabelEncoder`.
 
----
-
-**`🧠 Workflow`**
-
-**🔹 Diabetes Data**
-1. Load `diabetes_project.csv`.
-2. Preprocess: clean outliers, fill missing, scale features.
-3. Label: Use KMeans to infer diabetic status.
-4. Split and reduce dimensions using PCA.
-5. Train and evaluate the Super Learner.
-
-**🔹 Marketing Data**
-1. Load `Marketing.csv`.
-2. Encode categorical columns.
-3. Preprocess numeric features.
-4. Apply PCA, train and evaluate using Super Learner.
+### 6. `DataVisualization` Class
+- **Purpose**: Visualizes feature distributions, correlations, clusters, and PCA outputs.
 
 ---
 
-**`📊 Results`**
-- Cleaned dataset previews  
-- PCA-transformed shapes  
-- Best model hyperparameters  
-- Classification accuracy for both datasets  
+## 🧐 Workflow
+
+### 🔹 Diabetes Data
+1. Load `diabetes_project.csv`
+2. Visualize raw distributions and correlation matrix
+3. Preprocess: clean outliers, fill missing values, scale features
+4. Label using KMeans clustering
+5. Visualize clusters
+6. Split data and apply PCA
+7. Train and evaluate Super Learner
+
+### 🔹 Marketing Data
+1. Load `Marketing.csv`
+2. Encode categorical columns
+3. Preprocess numeric features
+4. Apply PCA, train and evaluate Super Learner
+
+---
+
+## 📊 Visual Outputs
+
+This pipeline generates and saves the following plots:
+- `databeforeprocessing.png`: Distribution plots of the raw diabetes dataset
+- `diabetescorrelation.png`: Correlation heatmap of diabetes dataset
+- `postprocessing.png`: Distribution plots after preprocessing
+- Cluster visualization: Glucose vs BMI, colored by inferred Outcome
+- PCA scatter plots for both datasets
+
+---
+
+## ✅ Project Requirement Mapping
+
+| Step | Description | Completed |
+|------|-------------|-----------|
+| 1 | Preprocessing | ✅ via `DataPreprocessor` |
+| 2 | Labeling (Medical) | ✅ via `LabelMaker` + KMeans |
+| 3 | Feature Extraction | ✅ PCA via `FeatureExtractor` |
+| 4 | Classification | ✅ `SuperLearner` stacking ensemble |
+| 5 | Generalization | ✅ Applied to Marketing dataset |
+
+---
+
+## 🧪 Sample Output
+
+```text
+mlp best settings: {'hidden_layer_sizes': (50,), 'alpha': 0.001}
+knn best settings: {'n_neighbors': 7, 'weights': 'uniform'}
+Final model settings: {'max_depth': 3, 'min_samples_split': 2}
+Medical Data Accuracy: 0.8759
+Marketing Data Accuracy: 0.8884
+```
 
 ---
 
@@ -102,6 +131,17 @@ pip install -r requirements.txt
 ```bash
 python main.py
 ```
+---
+## 📁 Code Structure
+
+- `main.py` — Entry point executing full pipeline
+- `DataPreprocessor` — Data cleaning and scaling
+- `LabelMaker` — Generates labels for diabetes data
+- `FeatureExtractor` — PCA and splitting
+- `SuperLearner` — Ensemble classification
+- `Encoder` — Encodes marketing data
+- `DataVisualization` — Generates all figures
+
 ---
 
 **`📝 Notes`**

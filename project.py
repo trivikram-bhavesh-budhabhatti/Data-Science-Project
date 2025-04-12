@@ -51,7 +51,7 @@ class DataPreprocessor:
         print(f"Starting preprocessing for {name}")
         cols = df.columns
         df = self.fill_missing(df, cols)
-        if name == "Medical Data":
+        if name == "Diabetes Data":
             num_cols = cols
         else:
             num_cols = ['age', 'last_contact_duration', 'campaign_contacts',
@@ -63,7 +63,7 @@ class DataPreprocessor:
 
 # Data Visualization Class
 class DataVisualization:
-    def visualize_medical_data(self, df):
+    def visualize_diabetes_data(self, df):
         plt.figure(figsize=(15, 10))
         for i, col in enumerate(df.columns, 1):
             plt.subplot(3, 3, i)
@@ -78,7 +78,7 @@ class DataVisualization:
         plt.title("Correlation Matrix of Diabetes Dataset")
         plt.savefig('diabetescorrelation.png')
 
-    def visualize_medical_data_post_preprocessing(self, df):
+    def visualize_diabetes_data_post_preprocessing(self, df):
         plt.figure(figsize=(15, 10))
         for i, col in enumerate(df.columns, 1):
             plt.subplot(3, 3, i)
@@ -87,6 +87,50 @@ class DataVisualization:
         plt.tight_layout()
         plt.suptitle("Diabetes Dataset After Preprocessing", y=1.02)
         plt.savefig('postprocessing.png')
+    
+    def visualize_marketing_data_preprocessing(self, df):
+        numeric_cols = df.select_dtypes(include=np.number).columns
+        n_cols = 3
+        n_rows = (len(numeric_cols) + n_cols - 1) // n_cols
+
+        plt.figure(figsize=(5 * n_cols, 4 * n_rows))
+        for i, col in enumerate(numeric_cols, 1):
+            plt.subplot(n_rows, n_cols, i)
+            sns.histplot(df[col], kde=True)
+            plt.title(f'Marketing - Raw {col}')
+        plt.tight_layout()
+        plt.suptitle("Marketing Data Feature Distributions (Before Preprocessing)", y=1.02)
+        plt.savefig("marketing_before_processing.png")
+        # plt.show()
+
+        exclude_cols = ['balance', 'default', 'marital', 'loan', 'previous_contacts']
+    
+    # Filter numeric columns and drop unwanted ones
+        numeric_cols1 = df.select_dtypes(include=np.number).columns
+        numeric_cols1 = [col for col in numeric_cols1 if col not in exclude_cols]
+        plt.figure(figsize=(10, 8))
+        sns.heatmap(df[numeric_cols1].corr(), annot=True, cmap='coolwarm', fmt=".2f", linewidths=0.5)
+        plt.title("Marketing Data Correlation Matrix (Before Preprocessing)",  fontsize=14, pad=12)
+        plt.savefig("marketing_corr_before.png")
+        # plt.show()
+
+    def visualize_marketing_data_post_preprocessing(self, df):
+        numeric_cols = df.select_dtypes(include=np.number).columns
+        n_cols = 3
+        n_rows = (len(numeric_cols) + n_cols - 1) // n_cols  # auto-calculate rows
+
+        plt.figure(figsize=(5 * n_cols, 4 * n_rows))
+        for i, col in enumerate(numeric_cols, 1):
+            plt.subplot(n_rows, n_cols, i)
+            sns.histplot(df[col], kde=True, color='lightgreen')
+            plt.title(f'Marketing - Normalized {col}')
+            plt.xlabel('')
+            plt.ylabel('')
+        plt.tight_layout()
+        plt.subplots_adjust(top=0.9, left=0.05, right=0.95, bottom=0.05)
+        plt.suptitle("Marketing Data Feature Distributions (After Preprocessing)", y=1.02)
+        plt.savefig("marketing_after_processing.png")
+
 
     def visualize_pca(self, X_pca, y, title="PCA Visualization"):
         plt.figure(figsize=(10, 6))
@@ -190,11 +234,11 @@ class Encoder:
 def main():
     df = pd.read_csv("./data_file/diabetes_project.csv")
     viz = DataVisualization()
-    viz.visualize_medical_data(df)
+    viz.visualize_diabetes_data(df)
 
     prep = DataPreprocessor()
-    df_clean = prep.preprocess(df, "Medical Data")
-    viz.visualize_medical_data_post_preprocessing(df_clean)
+    df_clean = prep.preprocess(df, "iabetes Data")
+    viz.visualize_diabetes_data_post_preprocessing(df_clean)
 
     label_maker = LabelMaker()
     feats = ['Glucose', 'BMI', 'Age']
@@ -204,19 +248,22 @@ def main():
     feat_ext = FeatureExtractor()
     X_train, X_test, y_train, y_test = feat_ext.split(df_with_labels, 'Outcome')
     X_train_pca, X_test_pca = feat_ext.pca_analysis(X_train, X_test)
-    viz.visualize_pca(X_train_pca, y_train, title="Medical Data - PCA")
+    viz.visualize_pca(X_train_pca, y_train, title="Diabetes Data - PCA")
 
     sl = SuperLearner()
     sl.tune_models(X_train_pca, y_train)
     sl.train_final(sl.get_preds(X_train_pca, y_train), y_train)
-    print(f"Medical Data Accuracy: {sl.check_accuracy(X_test_pca, y_test)}")
+    print(f"Diabetes Data Accuracy: {sl.check_accuracy(X_test_pca, y_test)}")
 
     df2 = pd.read_csv("./data_file/Marketing.csv")
     enc = Encoder()
     cat_cols = ['job', 'marital', 'education', 'default', 'housing', 'loan', 'previous_marketing_outcome']
     df2_enc = enc.encode(df2, cat_cols)
+    DataVisualization().visualize_marketing_data_preprocessing(df2_enc)
     df2_clean = prep.preprocess(df2_enc.drop('successful_marketing', axis=1), "Marketing Data")
     df2_clean['successful_marketing'] = df2['successful_marketing']
+    DataVisualization().visualize_marketing_data_post_preprocessing(df2_clean.drop('successful_marketing', axis=1))
+
 
     X_train2, X_test2, y_train2, y_test2 = feat_ext.split(df2_clean, 'successful_marketing')
     X_train2_pca, X_test2_pca = feat_ext.pca_analysis(X_train2, X_test2)

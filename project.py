@@ -159,10 +159,10 @@ class DataVisualization:
         #     plt.title(f"3D Clustering: {features[0]}, {features[1]}, {features[2]}")
         #     plt.show()
 
-    def visualize_pca(X_pca, y, title="PCA Visualization"):
+    def visualize_pca(self, X_pca, y, plot_title):
         plt.figure(figsize=(10, 6))
         sns.scatterplot(x=X_pca[:, 0], y=X_pca[:, 1], hue=y, palette='Set1')
-        plt.title(title)
+        plt.title(plot_title)
         plt.xlabel("PCA Component 1")
         plt.ylabel("PCA Component 2")
         plt.grid(True)
@@ -285,6 +285,7 @@ def main():
     feat_ext = FeatureExtractor()
     X_train, X_test, y_train, y_test = feat_ext.split(df_with_labels, 'Outcome')
     X_train_pca, X_test_pca = feat_ext.pca_analysis(X_train, X_test)
+    DataVisualization().visualize_pca(X_train_pca, y_train, plot_title="PCA - Medical Data")
     print("PCA shape:", X_train_pca.shape)
 
     # Super Learner

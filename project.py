@@ -237,7 +237,7 @@ def main():
     viz.visualize_diabetes_data(df)
 
     prep = DataPreprocessor()
-    df_clean = prep.preprocess(df, "iabetes Data")
+    df_clean = prep.preprocess(df, "Diabetes Data")
     viz.visualize_diabetes_data_post_preprocessing(df_clean)
 
     label_maker = LabelMaker()

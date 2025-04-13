@@ -145,7 +145,7 @@ class DataVisualization:
     def visualize_clusters(self, df, features, label_col='Outcome'):
         plt.figure(figsize=(10, 6))
         sns.scatterplot(data=df, x=features[0], y=features[1], hue=label_col, palette='Set1')
-        plt.title(f"2D Clustering: {features[0]} vs {features[1]}")
+        plt.title(f"Label Generation: {features[0]} vs {features[1]}")
         plt.grid(True)
         plt.show()
 
@@ -161,6 +161,8 @@ class LabelMaker:
         diabetic = means.idxmax()
         df['Outcome'] = df['Cluster'].apply(lambda x: 1 if x == diabetic else 0)
         df = df.drop('Cluster', axis=1)
+        print("Data with labels:")
+        print(df.head())
         return df
 
 # Feature Extraction Class
@@ -233,6 +235,8 @@ class Encoder:
 # Main Function
 def main():
     df = pd.read_csv("./data_file/diabetes_project.csv")
+    print(df.describe())
+    print("Diabetes columns:", df.columns.tolist())
     viz = DataVisualization()
     viz.visualize_diabetes_data(df)
 
@@ -256,6 +260,8 @@ def main():
     print(f"Diabetes Data Accuracy: {sl.check_accuracy(X_test_pca, y_test)}")
 
     df2 = pd.read_csv("./data_file/Marketing.csv")
+    print(df2.describe())
+    print("Marketing columns:", df2.columns.tolist())
     enc = Encoder()
     cat_cols = ['job', 'marital', 'education', 'default', 'housing', 'loan', 'previous_marketing_outcome']
     df2_enc = enc.encode(df2, cat_cols)

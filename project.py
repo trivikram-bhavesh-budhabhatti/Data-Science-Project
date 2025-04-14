@@ -13,6 +13,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score
 
+
 # Data Preprocessing Class
 class DataPreprocessor:
     def __init__(self):
@@ -61,6 +62,7 @@ class DataPreprocessor:
         df = self.scale_data(df, cols)
         return df
 
+
 # Data Visualization Class
 class DataVisualization:
     def visualize_diabetes_data(self, df):
@@ -87,7 +89,7 @@ class DataVisualization:
         plt.tight_layout()
         plt.suptitle("Diabetes Dataset After Preprocessing", y=1.02)
         plt.savefig('postprocessing.png')
-    
+
     def visualize_marketing_data_preprocessing(self, df):
         numeric_cols = df.select_dtypes(include=np.number).columns
         n_cols = 3
@@ -104,13 +106,13 @@ class DataVisualization:
         # plt.show()
 
         exclude_cols = ['balance', 'default', 'marital', 'loan', 'previous_contacts']
-    
-    # Filter numeric columns and drop unwanted ones
+
+        # Filter numeric columns and drop unwanted ones
         numeric_cols1 = df.select_dtypes(include=np.number).columns
         numeric_cols1 = [col for col in numeric_cols1 if col not in exclude_cols]
         plt.figure(figsize=(10, 8))
         sns.heatmap(df[numeric_cols1].corr(), annot=True, cmap='coolwarm', fmt=".2f", linewidths=0.5)
-        plt.title("Marketing Data Correlation Matrix (Before Preprocessing)",  fontsize=14, pad=12)
+        plt.title("Marketing Data Correlation Matrix (Before Preprocessing)", fontsize=14, pad=12)
         plt.savefig("marketing_corr_before.png")
         # plt.show()
 
@@ -131,7 +133,6 @@ class DataVisualization:
         plt.suptitle("Marketing Data Feature Distributions (After Preprocessing)", y=1.02)
         plt.savefig("marketing_after_processing.png")
 
-
     def visualize_pca(self, X_pca, y, title="PCA Visualization"):
         plt.figure(figsize=(10, 6))
         sns.scatterplot(x=X_pca[:, 0], y=X_pca[:, 1], hue=y, palette='Set1')
@@ -149,6 +150,18 @@ class DataVisualization:
         plt.grid(True)
         plt.show()
 
+    def visualize_cumulative_pca_variance(self, pca, title="PCA Explained Variance"):
+        plt.figure(figsize=(8, 6))
+        plt.plot(np.cumsum(pca.explained_variance_ratio_), marker='o', color='blue')
+        plt.title(f'Cumulative Explained Variance - {title}')
+        plt.xlabel('Number of Components')
+        plt.ylabel('Cumulative Explained Variance')
+        plt.grid(True)
+        plt.tight_layout()
+        plt.show()
+
+
+
 # Label Maker Class
 class LabelMaker:
     def __init__(self):
@@ -165,10 +178,11 @@ class LabelMaker:
         print(df.head())
         return df
 
+
 # Feature Extraction Class
 class FeatureExtractor:
     def __init__(self):
-        self.pca = PCA(n_components=3)
+        self.pca = PCA(n_components=4)
 
     def split(self, df, target):
         X = df.drop(target, axis=1)
@@ -177,6 +191,7 @@ class FeatureExtractor:
 
     def pca_analysis(self, X_train, X_test):
         return self.pca.fit_transform(X_train), self.pca.transform(X_test)
+
 
 # Super Learner Class
 class SuperLearner:
@@ -221,6 +236,7 @@ class SuperLearner:
     def check_accuracy(self, X, y):
         return accuracy_score(y, self.predict(X))
 
+
 # Encoder Class
 class Encoder:
     def __init__(self):
@@ -231,6 +247,7 @@ class Encoder:
             self.encoders[col] = LabelEncoder()
             df[col] = self.encoders[col].fit_transform(df[col].astype(str))
         return df
+
 
 # Main Function
 def main():
@@ -252,6 +269,10 @@ def main():
     feat_ext = FeatureExtractor()
     X_train, X_test, y_train, y_test = feat_ext.split(df_with_labels, 'Outcome')
     X_train_pca, X_test_pca = feat_ext.pca_analysis(X_train, X_test)
+
+    # Visualize cumulative PCA variance for Diabetes Data
+    viz.visualize_cumulative_pca_variance(feat_ext.pca, title="Diabetes Data - PCA")
+
     viz.visualize_pca(X_train_pca, y_train, title="Diabetes Data - PCA")
 
     sl = SuperLearner()
@@ -270,15 +291,18 @@ def main():
     df2_clean['successful_marketing'] = df2['successful_marketing']
     DataVisualization().visualize_marketing_data_post_preprocessing(df2_clean.drop('successful_marketing', axis=1))
 
-
     X_train2, X_test2, y_train2, y_test2 = feat_ext.split(df2_clean, 'successful_marketing')
     X_train2_pca, X_test2_pca = feat_ext.pca_analysis(X_train2, X_test2)
+
+    # Visualize cumulative PCA variance for Marketing Data
+    viz.visualize_cumulative_pca_variance(feat_ext.pca, title="Marketing Data - PCA")
+
     viz.visualize_pca(X_train2_pca, y_train2, title="Marketing Data - PCA")
 
     sl.tune_models(X_train2_pca, y_train2)
     sl.train_final(sl.get_preds(X_train2_pca, y_train2), y_train2)
     print(f"Marketing Data Accuracy: {sl.check_accuracy(X_test2_pca, y_test2)}")
 
+
 if __name__ == "__main__":
     main()
- 

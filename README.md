@@ -95,8 +95,8 @@ This pipeline generates and saves the following plots:
 mlp best settings: {'hidden_layer_sizes': (50,), 'alpha': 0.001}
 knn best settings: {'n_neighbors': 7, 'weights': 'uniform'}
 Final model settings: {'max_depth': 3, 'min_samples_split': 2}
-Medical Data Accuracy: 0.8759
-Marketing Data Accuracy: 0.8884
+Diabetes Data Accuracy: 0.9034
+Marketing Data Accuracy: 0.8906
 ```
 
 ---

@@ -26,7 +26,7 @@ This repository contains a Python script implementing a comprehensive machine le
 - **Purpose**: Prepares data using PCA and performs train-test splits.
 - **Functions**:
   - `split`: Splits dataset (80% train, 20% test).
-  - `pca_analysis`: Applies PCA to reduce dimensions to 3 components.
+  - `pca_analysis`: Applies PCA to reduce dimensions to 4 components.
 
 ### 4. `SuperLearner` Class
 - **Purpose**: Ensemble model using stacking for classification.
